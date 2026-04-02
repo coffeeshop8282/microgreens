@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ggreens">
+<title>Ggreens — Grow Scheduler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--gd:#2d4a1e;--gm:#4a7c35;--gl:#7ab648;--gp:#e8f0e0;--gmist:#f4f8ef;--ink:#1a2614;--inkm:#3d5030;--inkl:#7a9068;--border:#c8dab8;--borderl:#e0ebcf;--bg:#fafcf7;--white:#fff;--amber:#c8820a;--amberp:#fdf3dc;--red:#b83030;--redp:#fce8e8;--blue:#2a5f8a;--bluep:#e4eef8;--purple:#534AB7;--purplep:#eeedfe;--r:10px;--rs:6px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px}
+.header{background:var(--gd);padding:14px 20px 12px;position:sticky;top:0;z-index:100}
+.header-inner{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;color:#fff;letter-spacing:-0.02em}
+.logo span{color:var(--gl)}
+.hdate{font-size:11px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace}
+.nav{background:var(--gd);border-bottom:1px solid rgba(255,255,255,0.1);overflow-x:auto}
+.nav-inner{max-width:720px;margin:0 auto;display:flex;min-width:max-content}
+.nb{padding:10px 14px;border:none;background:none;color:rgba(255,255,255,0.5);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.15s}
+.nb.active{color:#fff;border-bottom-color:var(--gl)}
+.bdot{display:inline-block;width:6px;height:6px;background:var(--amber);border-radius:50%;margin-left:4px;vertical-align:middle;margin-bottom:1px}
+.main{max-width:720px;margin:0 auto;padding:16px 14px 80px}
+.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
+.metric{background:var(--white);border:1px solid var(--borderl);border-radius:var(--r);padding:10px 8px;text-align:center}
+.metric-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--gd);line-height:1;margin-bottom:3px}
+.metric-label{font-size:10px;color:var(--inkl);line-height:1.3}
+.metric.alert .metric-val{color:var(--amber)}
+.slabel{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--inkl);margin-bottom:10px;font-family:'DM Mono',monospace}
+.task-item{background:var(--white);border:1px solid var(--borderl);border-left:3px solid var(--gl);border-radius:var(--r);padding:11px 13px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px}
+.task-item.urgent{border-left-color:var(--amber)}
+.task-item.htask{border-left-color:var(--red)}
+.task-icon{font-size:17px;flex-shrink:0;margin-top:1px}
+.task-title{font-weight:500;font-size:14px}
+.task-sub{font-size:12px;color:var(--inkl);margin-top:2px}
+.order-card{background:var(--white);border:1px solid var(--borderl);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.order-hd{padding:12px 13px 10px;border-bottom:1px solid var(--borderl);display:flex;justify-content:space-between;align-items:flex-start}
+.ocust{font-weight:500;font-size:15px}
+.ometa{font-size:12px;color:var(--inkl);margin-top:2px}
+.sbadge{font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px;white-space:nowrap;font-family:'DM Mono',monospace}
+.s-pending{background:#f0ede8;color:#5a4e3c}.s-soak{background:var(--bluep);color:var(--blue)}
+.s-blackout{background:var(--purplep);color:var(--purple)}.s-grow{background:var(--gmist);color:var(--gm)}.s-done{background:#f0f0f0;color:#888}
+.card-actions{display:flex;align-items:center;gap:6px}
+.edit-btn{background:none;border:1px solid var(--borderl);border-radius:var(--rs);cursor:pointer;color:var(--inkl);font-size:12px;padding:3px 9px;font-family:'DM Sans',sans-serif}
+.edit-btn:hover{background:var(--gmist);border-color:var(--gm);color:var(--gm)}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--inkl);font-size:17px;padding:1px 5px;border-radius:4px;line-height:1}
+.del-btn:active{background:var(--redp);color:var(--red)}
+.phase-row{padding:9px 13px;border-bottom:1px solid var(--borderl)}
+.phase-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--borderl);margin-bottom:4px}
+.phase-seg{height:100%}
+.phase-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--inkl);font-family:'DM Mono',monospace}
+.tl-grid{padding:10px 13px}
+.tl-row{display:flex;align-items:baseline;padding:3px 0;font-size:13px}
+.tl-label{width:96px;flex-shrink:0;font-size:11px;color:var(--inkl);font-family:'DM Mono',monospace}
+.today-chip{display:inline-block;background:var(--amberp);color:var(--amber);font-size:10px;font-weight:500;padding:1px 6px;border-radius:3px;margin-left:6px;font-family:'DM Mono',monospace}
+.d-chip{font-size:10px;color:var(--inkl);margin-left:5px;font-family:'DM Mono',monospace}
+.vdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.tray-chip{display:inline-block;background:var(--gp);color:var(--gd);font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;margin-left:6px}
+.form-card{background:var(--white);border:1px solid var(--borderl);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--inkl);margin-bottom:5px;font-family:'DM Mono',monospace}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:var(--ink);appearance:none;-webkit-appearance:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--gm);background:var(--white)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.submit-btn{width:100%;padding:12px;background:var(--gd);color:#fff;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;margin-top:14px;transition:background 0.15s}
+.submit-btn:active{background:var(--gm)}
+.prev-box{background:var(--gmist);border:1px solid var(--borderl);border-radius:var(--rs);padding:12px;margin-top:12px}
+.prev-title{font-size:11px;font-weight:500;color:var(--inkl);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px}
+.prev-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--borderl);font-size:12px}
+.prev-row:last-child{border-bottom:none}
+.prev-row .pk{color:var(--inkl)}.prev-row .pv{font-weight:500;font-family:'DM Mono',monospace;font-size:11px}
+.prev-row.hl .pv{color:var(--gm)}
+.unit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:4px}
+.unit-btn{padding:8px 4px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--inkl);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;text-align:center;transition:all 0.15s}
+.unit-btn.active{border-color:var(--gm);background:var(--gp);color:var(--gd);font-weight:500}
+.mode-tabs{display:flex;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:16px}
+.mode-btn{flex:1;padding:9px 6px;border:none;background:var(--bg);color:var(--inkl);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.15s;border-right:1px solid var(--border)}
+.mode-btn:last-child{border-right:none}
+.mode-btn.active{background:var(--gd);color:#fff;font-weight:500}
+.bulk-hdr{display:grid;grid-template-columns:1.5fr 1.4fr 70px 1fr 28px;gap:6px;margin-bottom:4px}
+.bulk-col{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--inkl);font-family:'DM Mono',monospace}
+.bulk-row-item{display:grid;grid-template-columns:1.5fr 1.4fr 70px 1fr 28px;gap:6px;align-items:center;margin-bottom:6px}
+.bi{width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);color:var(--ink);appearance:none;-webkit-appearance:none}
+.bi:focus{outline:none;border-color:var(--gm);background:var(--white)}
+.add-row-btn{width:100%;padding:7px;background:none;border:1px dashed var(--border);border-radius:var(--rs);color:var(--inkl);font-size:13px;cursor:pointer;margin-top:4px}
+.add-row-btn:hover{border-color:var(--gm);color:var(--gm)}
+.rm-btn{background:none;border:none;cursor:pointer;color:var(--inkl);font-size:16px;padding:3px;border-radius:4px;line-height:1}
+.rm-btn:hover{color:var(--red);background:var(--redp)}
+.bulk-sum{background:var(--gmist);border:1px solid var(--borderl);border-radius:var(--rs);padding:10px 12px;margin-top:10px}
+.bsum-row{display:flex;justify-content:space-between;padding:2px 0;font-size:12px}
+.bsum-row .bk{color:var(--inkl)}.bsum-row .bv{font-family:'DM Mono',monospace;font-weight:500;font-size:11px}
+.inv-drop{border:2px dashed var(--border);border-radius:var(--r);padding:24px 20px;text-align:center;cursor:pointer;transition:all 0.15s;margin-bottom:10px}
+.inv-drop:hover,.inv-drop.drag-over{border-color:var(--gm);background:var(--gmist)}
+.inv-drop-icon{font-size:26px;margin-bottom:6px}
+.inv-drop-text{font-size:13px;color:var(--inkl)}
+.inv-drop-sub{font-size:11px;color:var(--inkl);margin-top:3px;opacity:0.7}
+.inv-ta{width:100%;min-height:110px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);color:var(--ink);resize:vertical}
+.inv-ta:focus{outline:none;border-color:var(--gm);background:var(--white)}
+.parse-btn{width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:10px;transition:background 0.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.parse-btn:active{background:#1a4a6e}.parse-btn:disabled{opacity:0.6;cursor:not-allowed}
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-box{background:var(--redp);border:1px solid #e8a0a0;border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--red);margin-top:10px}
+.ai-result-box{background:var(--white);border:1px solid var(--borderl);border-radius:var(--r);overflow:hidden;margin-top:12px}
+.ai-result-hd{padding:10px 13px;background:var(--gmist);border-bottom:1px solid var(--borderl);display:flex;align-items:center;justify-content:space-between}
+.ai-result-title{font-size:13px;font-weight:500;color:var(--gd)}
+.parsed-row{display:grid;grid-template-columns:20px 1fr 1fr 1fr 56px 28px;gap:5px;align-items:center;padding:7px 12px;border-bottom:1px solid var(--borderl);font-size:13px}
+.parsed-row:last-child{border-bottom:none}
+.ai-chk{width:15px;height:15px;cursor:pointer;accent-color:var(--gm)}
+.ai-f{padding:4px 7px;border:1px solid transparent;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;background:transparent;color:var(--ink);width:100%;appearance:none;-webkit-appearance:none}
+.ai-f:focus{outline:none;border-color:var(--gm);background:var(--white)}
+.confirm-btn{width:100%;padding:11px;background:var(--gd);color:#fff;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:12px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--white);border-radius:var(--r);padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:500;margin-bottom:16px;color:var(--gd)}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-save{flex:1;padding:11px;background:var(--gd);color:#fff;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer}
+.modal-cancel{padding:11px 16px;background:none;border:1px solid var(--border);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;color:var(--inkl)}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-nav{background:none;border:1px solid var(--border);border-radius:var(--rs);padding:6px 12px;cursor:pointer;font-size:13px;color:var(--inkm);font-family:'DM Sans',sans-serif}
+.cal-nav:hover{background:var(--gp)}
+.cal-month{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--gd)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{text-align:center;font-size:10px;font-family:'DM Mono',monospace;color:var(--inkl);padding:4px 0;font-weight:500}
+.cal-day{min-height:60px;background:var(--white);border:1px solid var(--borderl);border-radius:var(--rs);padding:4px 5px}
+.cal-day.om{background:var(--bg);opacity:0.5}.cal-day.is-today{border-color:var(--gm);border-width:1.5px}
+.cal-day-num{font-size:11px;font-family:'DM Mono',monospace;color:var(--inkl);margin-bottom:2px}
+.cal-day.is-today .cal-day-num{color:var(--gm);font-weight:500}
+.cal-ev{font-size:9px;font-weight:500;border-radius:2px;padding:1px 4px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+.cal-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.cal-leg{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--inkl)}
+.cal-leg-dot{width:10px;height:10px;border-radius:2px}
+.raw-wrap{overflow-x:auto;margin-bottom:16px}
+.raw-tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:580px}
+.raw-tbl th{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--inkl);font-family:'DM Mono',monospace;padding:8px 10px;border-bottom:2px solid var(--border);text-align:left;background:var(--gmist);white-space:nowrap}
+.raw-tbl td{padding:6px 8px;border-bottom:1px solid var(--borderl);vertical-align:middle}
+.raw-tbl tr:last-child td{border-bottom:none}.raw-tbl tr:hover td{background:var(--gmist)}
+.ri{width:100%;padding:4px 7px;border:1px solid transparent;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:13px;background:transparent;color:var(--ink)}
+.ri:focus{outline:none;border-color:var(--gm);background:var(--white)}
+.raw-save{padding:8px 20px;background:var(--gd);color:#fff;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
+.raw-reset{padding:8px 16px;background:none;color:var(--inkl);border:1px solid var(--border);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-left:8px}
+.save-notice{font-size:12px;color:var(--gm);font-family:'DM Mono',monospace;margin-left:10px;opacity:0;transition:opacity 0.3s}
+.save-notice.show{opacity:1}
+.info-box{background:var(--amberp);border:1px solid #e8c070;border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--amber);margin-bottom:14px;line-height:1.5}
+.empty-state{text-align:center;padding:48px 20px;color:var(--inkl)}
+.empty-icon{font-size:36px;margin-bottom:12px}
+@media(max-width:520px){
+  .sum-grid{grid-template-columns:repeat(2,1fr)}
+  .fg3{grid-template-columns:1fr 1fr}
+  .cal-day{min-height:46px}.cal-ev{font-size:8px}
+  .bulk-hdr,.bulk-row-item{grid-template-columns:1.3fr 1.2fr 60px 28px}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">g<span>g</span>reens <span style="color:rgba(255,255,255,0.3);font-weight:300">grow</span></div>
+    <div class="hdate" id="hdate"></div>
+  </div>
+</div>
+<div class="nav">
+  <div class="nav-inner">
+    <button class="nb active" onclick="switchTab('today')"    id="nb-today">오늘 <span class="bdot" id="dot-today" style="display:none"></span></button>
+    <button class="nb"        onclick="switchTab('orders')"   id="nb-orders">재배 현황</button>
+    <button class="nb"        onclick="switchTab('calendar')" id="nb-calendar">캘린더</button>
+    <button class="nb"        onclick="switchTab('add')"      id="nb-add">+ 주문 추가</button>
+    <button class="nb"        onclick="switchTab('raw')"      id="nb-raw">품종 데이터</button>
+  </div>
+</div>
+<div class="main">
+  <div class="sum-grid" id="summary"></div>
+  <div id="tab-today"></div>
+  <div id="tab-orders" style="display:none"></div>
+  <div id="tab-calendar" style="display:none"></div>
+  <div id="tab-add" style="display:none">
+    <div class="mode-tabs">
+      <button class="mode-btn active" onclick="switchAddMode('single')"  id="am-single">단건 등록</button>
+      <button class="mode-btn"        onclick="switchAddMode('bulk')"    id="am-bulk">대량 등록</button>
+      <button class="mode-btn"        onclick="switchAddMode('invoice')" id="am-invoice">인보이스 파싱</button>
+    </div>
+    <div id="add-single">
+      <div class="form-card">
+        <div class="fg2">
+          <div class="fg"><label>레스토랑 / 고객</label><input type="text" id="f-customer" placeholder="Forage Restaurant"></div>
+          <div class="fg"><label>납품 희망일</label><input type="date" id="f-delivery" onchange="updatePreview()"></div>
+        </div>
+        <div class="fg2">
+          <div class="fg"><label>품종</label><select id="f-variety" onchange="updatePreview()"></select></div>
+          <div class="fg"><label>비고</label><input type="text" id="f-note" placeholder="선택사항"></div>
+        </div>
+        <div class="fg">
+          <label>주문 단위</label>
+          <div class="unit-grid" id="ug-single">
+            <button class="unit-btn active" onclick="selectUnit('single','50g')">50g</button>
+            <button class="unit-btn" onclick="selectUnit('single','100g')">100g</button>
+            <button class="unit-btn" onclick="selectUnit('single','200g')">200g</button>
+            <button class="unit-btn" onclick="selectUnit('single','live')">Live Tray</button>
+          </div>
+        </div>
+        <div id="prev-box" style="display:none" class="prev-box">
+          <div class="prev-title">예상 일정 & 트레이</div>
+          <div id="prev-rows"></div>
+        </div>
+        <button class="submit-btn" onclick="addSingle()">등록</button>
+      </div>
+    </div>
+    <div id="add-bulk" style="display:none">
+      <div class="form-card">
+        <div class="fg2" style="margin-bottom:14px">
+          <div class="fg"><label>레스토랑 / 고객</label><input type="text" id="b-customer" placeholder="Forage Restaurant"></div>
+          <div class="fg"><label>납품 희망일</label><input type="date" id="b-delivery" onchange="updateBulkSum()"></div>
+        </div>
+        <div class="bulk-hdr">
+          <div class="bulk-col">품종</div><div class="bulk-col">주문 단위</div>
+          <div class="bulk-col">수량</div><div class="bulk-col">비고</div><div></div>
+        </div>
+        <div id="bulk-rows"></div>
+        <button class="add-row-btn" onclick="addBulkRow()">+ 품종 추가</button>
+        <div id="bulk-sum" class="bulk-sum" style="display:none"></div>
+        <button class="submit-btn" onclick="submitBulk()">전체 등록</button>
+      </div>
+    </div>
+    <div id="add-invoice" style="display:none">
+      <div class="form-card">
+        <div class="fg" style="margin-bottom:14px">
+          <label>기본 납품일 (인보이스에 날짜 없을 때)</label>
+          <input type="date" id="inv-delivery">
+        </div>
+        <div class="inv-drop" id="inv-drop"
+          onclick="document.getElementById('inv-file').click()"
+          ondragover="invDragOver(event)" ondragleave="invDragLeave(event)" ondrop="invDrop(event)">
+          <div class="inv-drop-icon">📄</div>
+          <div class="inv-drop-text" id="inv-drop-text">PDF 또는 이미지 드래그 & 드롭</div>
+          <div class="inv-drop-sub" id="inv-drop-sub">또는 클릭하여 파일 선택 (PNG, JPG, PDF)</div>
+          <input type="file" id="inv-file" accept=".pdf,.png,.jpg,.jpeg" style="display:none" onchange="handleInvFile(event)">
+        </div>
+        <div style="text-align:center;font-size:12px;color:var(--inkl);margin:8px 0">또는 텍스트 직접 붙여넣기</div>
+        <textarea class="inv-ta" id="inv-text" placeholder="이메일, Square 인보이스, 메모 등&#10;&#10;예시:&#10;Forage Restaurant 납품일 4/15&#10;- Arugula 200g x2&#10;- Sunflower 1 live tray&#10;- Radish 100g"></textarea>
+        <button class="parse-btn" id="parse-btn" onclick="parseInvoice()">
+          <span id="parse-label">AI로 주문 자동 파싱</span>
+          <div class="spinner" id="parse-spin" style="display:none"></div>
+        </button>
+        <div id="inv-err" style="display:none" class="err-box"></div>
+        <div id="ai-result"></div>
+      </div>
+    </div>
+  </div>
+  <div id="tab-raw" style="display:none"></div>
+</div>
+<div class="modal-overlay" id="edit-modal" style="display:none" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">주문 수정</div>
+    <input type="hidden" id="edit-id">
+    <div class="fg2">
+      <div class="fg"><label>고객</label><input type="text" id="edit-customer"></div>
+      <div class="fg"><label>납품일</label><input type="date" id="edit-delivery" onchange="updateEditPreview()"></div>
+    </div>
+    <div class="fg"><label>품종</label><select id="edit-variety" onchange="updateEditPreview()"></select></div>
+    <div class="fg">
+      <label>주문 단위</label>
+      <div class="unit-grid" id="ug-edit">
+        <button class="unit-btn" onclick="selectUnit('edit','50g')">50g</button>
+        <button class="unit-btn" onclick="selectUnit('edit','100g')">100g</button>
+        <button class="unit-btn" onclick="selectUnit('edit','200g')">200g</button>
+        <button class="unit-btn" onclick="selectUnit('edit','live')">Live Tray</button>
+      </div>
+    </div>
+    <div class="fg"><label>수량 (단위 기준)</label><input type="number" id="edit-qty" value="1" min="1" onchange="updateEditPreview()"></div>
+    <div class="fg"><label>비고</label><input type="text" id="edit-note"></div>
+    <div id="edit-prev" class="prev-box" style="display:none;margin-top:0;margin-bottom:12px">
+      <div class="prev-title">수정 후 일정</div>
+      <div id="edit-prev-rows"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="document.getElementById('edit-modal').style.display='none'">취소</button>
+      <button class="modal-save" onclick="saveEdit()">저장</button>
+    </div>
+  </div>
+</div>
+<script>
+const DEFAULT_VARIETIES={
+  arugula:    {name:'Arugula',        soak:0,blackout:4,open:3,grow:4, seedCost:1.19,yieldG:100,color:'#639922'},
+  broccoli:   {name:'Broccoli',       soak:0,blackout:3,open:2,grow:3, seedCost:1.44,yieldG:150,color:'#1D9E75'},
+  mustard:    {name:'Mustard',        soak:0,blackout:3,open:2,grow:2, seedCost:2.01,yieldG:125,color:'#BA7517'},
+  kohlrabi:   {name:'Purple Kohlrabi',soak:0,blackout:4,open:3,grow:2, seedCost:1.95,yieldG:150,color:'#7F77DD'},
+  radish:     {name:'Radish',         soak:0,blackout:3,open:2,grow:2, seedCost:0.87,yieldG:200,color:'#D4537E'},
+  redcabbage: {name:'Red Cabbage',    soak:0,blackout:4,open:3,grow:2, seedCost:1.80,yieldG:150,color:'#993556'},
+  sunflower:  {name:'Sunflower',      soak:1,blackout:3,open:3,grow:3, seedCost:1.99,yieldG:250,color:'#EF9F27'},
+  pea:        {name:'Dwarf Sweet Pea',soak:1,blackout:3,open:3,grow:3, seedCost:1.23,yieldG:250,color:'#5DCAA5'},
+  corn:       {name:'Popcorn',        soak:1,blackout:4,open:3,grow:3, seedCost:5.12,yieldG:150,color:'#FAC775'},
+  lentil:     {name:'Crimson Lentil', soak:0,blackout:3,open:2,grow:3, seedCost:1.10,yieldG:120,color:'#D85A30'},
+  beet:       {name:'Beets Ruby',     soak:1,blackout:4,open:3,grow:3, seedCost:4.00,yieldG:50, color:'#993C1D'},
+  cress:      {name:'Curly Cress',    soak:0,blackout:3,open:2,grow:1, seedCost:0.90,yieldG:80, color:'#2a7a5c'},
+};
+const UNITS=['50g','100g','200g','live'];
+let VARIETIES=JSON.parse(localStorage.getItem('gg_var')||'null')||JSON.parse(JSON.stringify(DEFAULT_VARIETIES));
+let orders=JSON.parse(localStorage.getItem('gg_ord_v4')||'[]');
+const NOW=new Date(); let calYear=NOW.getFullYear(),calMonth=NOW.getMonth();
+let selUnit={single:'50g',bulk:{},edit:'50g'};
+
+// ── bulk row registry: maps rowId → DOM id suffix ─────────────────────────
+// We store the actual rowId as a data attribute and look it up consistently.
+let bulkRowCount=0;
+
+function save(){try{localStorage.setItem('gg_ord_v4',JSON.stringify(orders))}catch(e){}}
+function saveVar(){try{localStorage.setItem('gg_var',JSON.stringify(VARIETIES))}catch(e){}}
+function today(){const d=new Date();d.setHours(0,0,0,0);return d;}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function isToday(d){const t=today();return d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate();}
+function fmtDate(d){return d.toLocaleDateString('ko-KR',{month:'short',day:'numeric',weekday:'short'});}
+function fmtISO(d){return d.toISOString().slice(0,10);}
+function varOpts(sel){return Object.entries(VARIETIES).map(([k,v])=>`<option value="${k}"${k===sel?' selected':''}>${v.name}</option>`).join('');}
+
+// trays: ceil(grams/yieldG) × qty. Live tray = qty trays.
+function traysFor(unit,qty,vk){
+  const v=VARIETIES[vk];
+  if(!v) return 1;
+  const numQty=parseInt(qty,10)||1;
+  if(unit==='live') return numQty;
+  const g=parseInt(unit,10); // 50, 100, 200
+  return Math.ceil(g/v.yieldG)*numQty;
+}
+function unitDisp(unit,qty){return unit==='live'?`${qty} Live Tray`:`${qty}×${unit}`;}
+
+// Schedule: [soakStart →] plant → blackout → lidOpen → harvest
+// soakStart = plant - soak days  (displayed as "soaking" before plant date)
+function calcSched(pStr,vk){
+  const v=VARIETIES[vk];
+  const p=new Date(pStr);p.setHours(0,0,0,0);
+  // soakStart: days before planting when seeds go into water
+  const soakStart=v.soak>0?addDays(p,-v.soak):null;
+  let c=new Date(p);
+  const lidOpen=addDays(c,v.blackout);
+  c=new Date(lidOpen);
+  const harvest=addDays(c,v.open+v.grow);
+  return{soakStart,plant:p,lidOpen,harvest,total:v.soak+v.blackout+v.open+v.grow};
+}
+function plantFrom(delStr,vk){
+  const v=VARIETIES[vk];const d=new Date(delStr);d.setHours(0,0,0,0);
+  return addDays(d,-(v.soak+v.blackout+v.open+v.grow));
+}
+function getStatus(s){
+  const t=today();
+  if(s.soakStart&&t>=s.soakStart&&t<s.plant) return{label:'소킹 중',key:'soak'};
+  if(t<s.plant)               return{label:'파종 전',key:'pending'};
+  if(t<s.lidOpen)             return{label:'블랙아웃',key:'blackout'};
+  if(t<=s.harvest)            return{label:'성장 중',key:'grow'};
+  return{label:'완료',key:'done'};
+}
+
+// ── UNIT SELECT ────────────────────────────────────────────────────────────
+function selectUnit(ctx,unit){
+  selUnit[ctx]=unit;
+  const grid=document.getElementById('ug-'+ctx);
+  if(grid)grid.querySelectorAll('.unit-btn').forEach((b,i)=>b.classList.toggle('active',UNITS[i]===unit));
+  if(ctx==='single')updatePreview();
+  if(ctx==='edit')updateEditPreview();
+}
+function selectBulkUnit(rowId,unit){
+  selUnit.bulk[rowId]=unit;
+  const grid=document.getElementById(`bu-${rowId}`);
+  if(grid)grid.querySelectorAll('.unit-btn').forEach((b,i)=>b.classList.toggle('active',UNITS[i]===unit));
+  updateBulkSum();
+}
+
+// ── SUMMARY ───────────────────────────────────────────────────────────────
+function renderSummary(){
+  const t=today(),tasks=getTodayTasks();
+  const active=orders.filter(o=>{const s=calcSched(o.plantDate,o.variety);return t>=s.plant&&t<=s.harvest;});
+  const soon=orders.filter(o=>{const s=calcSched(o.plantDate,o.variety);const d=Math.round((s.harvest-t)/86400000);return d>=0&&d<=3;});
+  const pend=orders.filter(o=>{const s=calcSched(o.plantDate,o.variety);return t<s.plant;});
+  document.getElementById('summary').innerHTML=`
+    <div class="metric${tasks.length?' alert':''}"><div class="metric-val">${tasks.length}</div><div class="metric-label">오늘 할 일</div></div>
+    <div class="metric"><div class="metric-val">${active.length}</div><div class="metric-label">재배 중</div></div>
+    <div class="metric${soon.length?' alert':''}"><div class="metric-val">${soon.length}</div><div class="metric-label">3일내 수확</div></div>
+    <div class="metric"><div class="metric-val">${pend.length}</div><div class="metric-label">예정</div></div>`;
+  document.getElementById('dot-today').style.display=tasks.length?'inline-block':'none';
+}
+
+// ── TODAY ─────────────────────────────────────────────────────────────────
+function getTodayTasks(){
+  const tasks=[];
+  orders.forEach(o=>{
+    const s=calcSched(o.plantDate,o.variety);const v=VARIETIES[o.variety];
+    if(s.soakStart&&isToday(s.soakStart)) tasks.push({o,v,label:'소킹 시작',icon:'💧',sub:`${v.name} · ${o.trays}트레이 침수`});
+    if(isToday(s.plant))    tasks.push({o,v,label:'파종',icon:'🌱',sub:`${v.name} · ${o.trays}트레이`});
+    if(isToday(s.lidOpen))  tasks.push({o,v,label:'뚜껑 개방',icon:'☀️',sub:`${v.name} · 빛 노출 시작`,urgent:true});
+    if(isToday(s.harvest))  tasks.push({o,v,label:`수확/납품 — ${o.customer}`,icon:'✂️',sub:`${v.name} ${o.trays}트레이 → ${unitDisp(o.orderUnit||'100g',o.orderQty||1)}`,htask:true});
+  });
+  return tasks;
+}
+function renderToday(){
+  const el=document.getElementById('tab-today');const tasks=getTodayTasks();
+  if(!tasks.length){el.innerHTML=`<div class="empty-state"><div class="empty-icon">✓</div>오늘 할 일이 없어요</div>`;return;}
+  el.innerHTML=`<div class="slabel">${fmtDate(today())} 작업</div>`+
+    tasks.map(t=>`<div class="task-item${t.urgent?' urgent':''}${t.htask?' htask':''}">
+      <div class="task-icon">${t.icon}</div>
+      <div><div class="task-title">${t.label}</div>
+      <div class="task-sub">${t.o.customer} · ${t.sub}</div></div></div>`).join('');
+}
+
+// ── ORDERS ────────────────────────────────────────────────────────────────
+function renderOrders(){
+  const el=document.getElementById('tab-orders');
+  if(!orders.length){el.innerHTML=`<div class="empty-state"><div class="empty-icon">🌿</div>등록된 주문이 없어요</div>`;return;}
+  const t=today();
+  const sorted=[...orders].sort((a,b)=>new Date(a.delivery)-new Date(b.delivery));
+  const bc={pending:'s-pending',soak:'s-soak',blackout:'s-blackout',grow:'s-grow',done:'s-done'};
+  el.innerHTML=`<div class="slabel">총 ${orders.length}건</div>`+sorted.map(o=>{
+    const s=calcSched(o.plantDate,o.variety);const v=VARIETIES[o.variety];
+    const st=getStatus(s);const dL=Math.round((s.harvest-t)/86400000);
+    const tot=v.soak+v.blackout+v.open+v.grow;
+    const phases=[
+      ...(v.soak>0?[{d:v.soak,c:'#378ADD'}]:[]),
+      {d:v.blackout,c:'#534AB7'},
+      {d:v.open+v.grow,c:v.color}
+    ].filter(p=>p.d>0);
+    const phBar=phases.map(p=>`<div class="phase-seg" style="width:${Math.round(p.d/tot*100)}%;background:${p.c};opacity:0.8"></div>`).join('');
+    const orderD=unitDisp(o.orderUnit||'100g',o.orderQty||1);
+    // Build timeline rows — soakStart replaces soakEnd; no침수종료
+    const rows=[
+      ...(s.soakStart?[['💧 소킹 시작',s.soakStart,false]]:[]),
+      ['🌱 파종일',s.plant,false],
+      ['☀️ 뚜껑 개방',s.lidOpen,true],
+      ['✂️ 수확/납품',s.harvest,false]
+    ];
+    return `<div class="order-card">
+      <div class="order-hd">
+        <div>
+          <div class="ocust"><span class="vdot" style="background:${v.color}"></span>${o.customer}</div>
+          <div class="ometa">${v.name} · 주문 ${orderD}<span class="tray-chip">${o.trays}트레이 파종</span></div>
+          <div class="ometa" style="margin-top:3px">씨앗원가 $${(v.seedCost*o.trays).toFixed(2)}${o.note?' · '+o.note:''}</div>
+        </div>
+        <div class="card-actions">
+          <span class="sbadge ${bc[st.key]||'s-grow'}">${st.label}</span>
+          <button class="edit-btn" onclick="openEdit(${o.id})">수정</button>
+          <button class="del-btn" onclick="deleteOrder(${o.id})">×</button>
+        </div>
+      </div>
+      <div class="phase-row"><div class="phase-bar">${phBar}</div>
+        <div class="phase-labels">
+          ${v.soak>0?'<span>소킹</span>':'<span></span>'}
+          <span>블랙아웃</span><span>성장/수확</span>
+        </div>
+      </div>
+      <div class="tl-grid">${rows.map(([lb,dt,hl])=>`<div class="tl-row">
+        <div class="tl-label">${lb}</div>
+        <div style="${hl?'font-weight:500;color:var(--gm)':''}">${fmtDate(dt)}${isToday(dt)?'<span class="today-chip">오늘</span>':''}${lb.includes('수확')&&dL>0?`<span class="d-chip">D-${dL}</span>`:''}</div>
+      </div>`).join('')}</div></div>`;
+  }).join('');
+}
+function deleteOrder(id){if(!confirm('삭제할까요?'))return;orders=orders.filter(o=>o.id!==id);save();render();}
+
+// ── EDIT MODAL ────────────────────────────────────────────────────────────
+function openEdit(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  document.getElementById('edit-id').value=id;
+  document.getElementById('edit-customer').value=o.customer;
+  document.getElementById('edit-delivery').value=o.delivery;
+  document.getElementById('edit-variety').innerHTML=varOpts(o.variety);
+  document.getElementById('edit-note').value=o.note||'';
+  document.getElementById('edit-qty').value=o.orderQty||1;
+  selUnit.edit=o.orderUnit||'100g';
+  document.getElementById('ug-edit').querySelectorAll('.unit-btn').forEach((b,i)=>b.classList.toggle('active',UNITS[i]===selUnit.edit));
+  updateEditPreview();
+  document.getElementById('edit-modal').style.display='flex';
+}
+function closeModal(e){if(e.target.id==='edit-modal')document.getElementById('edit-modal').style.display='none';}
+function updateEditPreview(){
+  const del=document.getElementById('edit-delivery').value;
+  const vk=document.getElementById('edit-variety').value;
+  const qty=parseInt(document.getElementById('edit-qty').value,10)||1;
+  const unit=selUnit.edit;
+  const box=document.getElementById('edit-prev');
+  if(!del){box.style.display='none';return;}
+  const trays=traysFor(unit,qty,vk);
+  const p=plantFrom(del,vk);const s=calcSched(fmtISO(p),vk);const v=VARIETIES[vk];
+  box.style.display='block';
+  const note=unit!=='live'?` (${v.yieldG}g/트레이)`:' (1트레이=1live)';
+  const rows=[
+    ...(s.soakStart?[['소킹 시작',fmtDate(s.soakStart),false]]:[]),
+    ['파종일',fmtDate(s.plant),false],
+    ['뚜껑 개방',fmtDate(s.lidOpen),true],
+    ['수확/납품',fmtDate(s.harvest),false],
+    ['필요 트레이',`${trays}트레이${note}`,true],
+    ['씨앗 원가',`$${(v.seedCost*trays).toFixed(2)}`,false]
+  ];
+  document.getElementById('edit-prev-rows').innerHTML=rows.map(([k,val,h])=>`<div class="prev-row${h?' hl':''}"><span class="pk">${k}</span><span class="pv">${val}</span></div>`).join('');
+}
+function saveEdit(){
+  const id=parseInt(document.getElementById('edit-id').value,10);
+  const customer=document.getElementById('edit-customer').value.trim();
+  const delivery=document.getElementById('edit-delivery').value;
+  const variety=document.getElementById('edit-variety').value;
+  const note=document.getElementById('edit-note').value.trim();
+  const qty=parseInt(document.getElementById('edit-qty').value,10)||1;
+  const unit=selUnit.edit;
+  if(!customer||!delivery){alert('고객명과 납품일을 입력해주세요');return;}
+  const trays=traysFor(unit,qty,variety);
+  orders=orders.map(o=>o.id===id?{...o,customer,delivery,variety,trays,note,orderUnit:unit,orderQty:qty,plantDate:fmtISO(plantFrom(delivery,variety))}:o);
+  save();render();document.getElementById('edit-modal').style.display='none';
+}
+
+// ── SINGLE ADD ────────────────────────────────────────────────────────────
+function updatePreview(){
+  const del=document.getElementById('f-delivery').value;
+  const vk=document.getElementById('f-variety').value;
+  const unit=selUnit.single;
+  const box=document.getElementById('prev-box');
+  if(!del){box.style.display='none';return;}
+  const trays=traysFor(unit,1,vk);
+  const p=plantFrom(del,vk);const s=calcSched(fmtISO(p),vk);const v=VARIETIES[vk];
+  box.style.display='block';
+  const note=unit!=='live'?` (수확량 ${v.yieldG}g/트레이)`:' (1live=1트레이)';
+  const rows=[
+    ...(s.soakStart?[['소킹 시작',fmtDate(s.soakStart),false]]:[]),
+    ['파종일',fmtDate(s.plant),false],
+    ['뚜껑 개방',fmtDate(s.lidOpen),true],
+    ['수확/납품',fmtDate(s.harvest),false],
+    ['필요 트레이',`${trays}트레이${note}`,true],
+    ['씨앗 원가',`$${(v.seedCost*trays).toFixed(2)}`,false]
+  ];
+  document.getElementById('prev-rows').innerHTML=rows.map(([k,val,h])=>`<div class="prev-row${h?' hl':''}"><span class="pk">${k}</span><span class="pv">${val}</span></div>`).join('');
+}
+function addSingle(){
+  const customer=document.getElementById('f-customer').value.trim();
+  const delivery=document.getElementById('f-delivery').value;
+  const variety=document.getElementById('f-variety').value;
+  const note=document.getElementById('f-note').value.trim();
+  const unit=selUnit.single;
+  if(!customer||!delivery){alert('고객명과 납품일을 입력해주세요');return;}
+  const trays=traysFor(unit,1,variety);
+  orders.push({id:Date.now(),customer,delivery,variety,trays,note,orderUnit:unit,orderQty:1,plantDate:fmtISO(plantFrom(delivery,variety))});
+  save();document.getElementById('f-customer').value='';document.getElementById('f-note').value='';
+  document.getElementById('prev-box').style.display='none';render();switchTab('orders');
+}
+
+// ── BULK ──────────────────────────────────────────────────────────────────
+// FIX: store rowId on the DOM element itself so getBulkItems reads it correctly.
+function initBulkRows(){
+  document.getElementById('bulk-rows').innerHTML='';
+  bulkRowCount=0;
+  selUnit.bulk={};
+  addBulkRow();
+  addBulkRow();
+}
+function addBulkRow(){
+  const id=bulkRowCount++;
+  selUnit.bulk[id]='50g'; // default unit
+  const div=document.createElement('div');
+  div.className='bulk-row-item';
+  div.id=`br-${id}`;
+  div.dataset.rowid=id; // ← store numeric id on element
+  div.innerHTML=`
+    <select class="bi" id="bv-${id}" onchange="updateBulkSum()">${varOpts('arugula')}</select>
+    <div id="bu-${id}" style="display:flex;gap:2px">
+      ${UNITS.map((u,i)=>`<button class="unit-btn${i===0?' active':''}" style="flex:1;font-size:10px;padding:6px 2px" onclick="selectBulkUnit(${id},'${u}')">${u==='live'?'Live':u}</button>`).join('')}
+    </div>
+    <input class="bi" type="number" id="bq-${id}" value="1" min="1" max="50" onchange="updateBulkSum()">
+    <input class="bi" type="text" id="bn-${id}" placeholder="비고">
+    <button class="rm-btn" onclick="removeBulkRow(${id})">×</button>`;
+  document.getElementById('bulk-rows').appendChild(div);
+  updateBulkSum();
+}
+function removeBulkRow(id){
+  const el=document.getElementById(`br-${id}`);
+  if(el)el.remove();
+  delete selUnit.bulk[id];
+  updateBulkSum();
+}
+// FIX: iterate actual DOM rows using data-rowid, not regex on id strings
+function getBulkItems(){
+  const items=[];
+  document.querySelectorAll('#bulk-rows .bulk-row-item').forEach(row=>{
+    const id=parseInt(row.dataset.rowid,10);
+    const selEl=document.getElementById(`bv-${id}`);
+    const qtyEl=document.getElementById(`bq-${id}`);
+    const noteEl=document.getElementById(`bn-${id}`);
+    if(!selEl) return;
+    const vk=selEl.value;
+    const unit=selUnit.bulk[id]||'50g';
+    const qty=parseInt(qtyEl?.value,10)||1;
+    const note=noteEl?.value||'';
+    items.push({vk,unit,qty,note,rowId:id});
+  });
+  return items;
+}
+function updateBulkSum(){
+  const del=document.getElementById('b-delivery').value;
+  const items=getBulkItems();
+  const box=document.getElementById('bulk-sum');
+  if(!del||!items.length){box.style.display='none';return;}
+  let totalCost=0;let html='';
+  items.forEach(({vk,unit,qty})=>{
+    const v=VARIETIES[vk];
+    const trays=traysFor(unit,qty,vk);
+    const p=plantFrom(del,vk);
+    const s=calcSched(fmtISO(p),vk);
+    const c=v.seedCost*trays;
+    totalCost+=c;
+    // Show soakStart date if applicable, otherwise plant date
+    const startDate=s.soakStart?s.soakStart:s.plant;
+    const startLabel=s.soakStart?'소킹':'파종';
+    html+=`<div class="bsum-row"><span class="bk">${v.name} ${unitDisp(unit,qty)} → <strong>${trays}트레이</strong></span><span class="bv">${startLabel} ${fmtDate(startDate)} · $${c.toFixed(2)}</span></div>`;
+  });
+  html+=`<div class="bsum-row" style="border-top:1px solid var(--borderl);margin-top:4px;padding-top:6px"><span class="bk" style="font-weight:500">총 씨앗원가</span><span class="bv">$${totalCost.toFixed(2)}</span></div>`;
+  box.innerHTML=html;box.style.display='block';
+}
+function submitBulk(){
+  const customer=document.getElementById('b-customer').value.trim();
+  const delivery=document.getElementById('b-delivery').value;
+  const items=getBulkItems();
+  if(!customer||!delivery){alert('고객명과 납품일을 입력해주세요');return;}
+  if(!items.length){alert('품종을 하나 이상 추가해주세요');return;}
+  items.forEach(({vk,unit,qty,note})=>{
+    const trays=traysFor(unit,qty,vk);
+    orders.push({id:Date.now()+Math.random(),customer,delivery,variety:vk,trays,note,orderUnit:unit,orderQty:qty,plantDate:fmtISO(plantFrom(delivery,vk))});
+  });
+  save();render();
+  document.getElementById('b-customer').value='';
+  document.getElementById('bulk-sum').style.display='none';
+  initBulkRows();
+  switchTab('orders');
+}
+
+// ── INVOICE AI ────────────────────────────────────────────────────────────
+let invFileData=null;
+function invDragOver(e){e.preventDefault();document.getElementById('inv-drop').classList.add('drag-over');}
+function invDragLeave(){document.getElementById('inv-drop').classList.remove('drag-over');}
+function invDrop(e){e.preventDefault();document.getElementById('inv-drop').classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)processInvFile(f);}
+function handleInvFile(e){const f=e.target.files[0];if(f)processInvFile(f);}
+function processInvFile(file){
+  const reader=new FileReader();
+  reader.onload=ev=>{invFileData={name:file.name,type:file.type,data:ev.target.result.split(',')[1]};document.getElementById('inv-drop-text').textContent=`✓ ${file.name}`;document.getElementById('inv-drop-sub').textContent='클릭하여 다른 파일 선택';};
+  reader.readAsDataURL(file);
+}
+async function parseInvoice(){
+  const text=document.getElementById('inv-text').value.trim();
+  const fallback=document.getElementById('inv-delivery').value||fmtISO(today());
+  if(!text&&!invFileData){alert('텍스트를 입력하거나 파일을 업로드해주세요');return;}
+  const btn=document.getElementById('parse-btn');
+  document.getElementById('parse-label').textContent='분석 중...';
+  document.getElementById('parse-spin').style.display='block';
+  btn.disabled=true;document.getElementById('inv-err').style.display='none';document.getElementById('ai-result').innerHTML='';
+  const varList=Object.entries(VARIETIES).map(([k,v])=>`${k}=${v.name}`).join(', ');
+  const prompt=`Microgreens farm order parser. Today is ${fmtISO(today())}.
+Variety keys: ${varList}
+Order units: "50g","100g","200g","live" (live tray).
+Return ONLY a JSON array, no markdown.
+Each: {"customer":string,"variety":variety_key,"orderUnit":"50g"|"100g"|"200g"|"live","orderQty":integer,"delivery":"YYYY-MM-DD","note":string}
+Use ${fallback} if no date. Match varieties loosely.
+${text?'Text:\n'+text:'See file.'}`;
+  const content=[];
+  if(invFileData){content.push(invFileData.type==='application/pdf'?{type:'document',source:{type:'base64',media_type:'application/pdf',data:invFileData.data}}:{type:'image',source:{type:'base64',media_type:invFileData.type,data:invFileData.data}});}
+  content.push({type:'text',text:prompt});
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content}]})});
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    const raw=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(raw);
+    if(!Array.isArray(parsed)||!parsed.length)throw new Error('주문 항목을 찾을 수 없어요');
+    showAIResult(parsed);
+  }catch(e){const err=document.getElementById('inv-err');err.textContent='파싱 실패: '+e.message;err.style.display='block';}
+  finally{document.getElementById('parse-label').textContent='AI로 주문 자동 파싱';document.getElementById('parse-spin').style.display='none';btn.disabled=false;}
+}
+function showAIResult(items){
+  const rows=items.map((item,i)=>{
+    const vk=VARIETIES[item.variety]?item.variety:'arugula';
+    const unit=UNITS.includes(item.orderUnit)?item.orderUnit:'100g';
+    return `<div class="parsed-row">
+      <input type="checkbox" class="ai-chk" id="chk-${i}" checked>
+      <input class="ai-f" type="text" id="ac-${i}" value="${item.customer||''}">
+      <select class="ai-f" id="av-${i}">${varOpts(vk)}</select>
+      <select class="ai-f" id="au-${i}">${UNITS.map(u=>`<option value="${u}"${u===unit?' selected':''}>${u==='live'?'Live Tray':u}</option>`).join('')}</select>
+      <input class="ai-f" type="number" id="aq-${i}" value="${item.orderQty||1}" min="1" style="width:50px">
+      <input type="hidden" id="ad-${i}" value="${item.delivery||''}">
+    </div>`;
+  }).join('');
+  document.getElementById('ai-result').innerHTML=`
+    <div class="ai-result-box">
+      <div class="ai-result-hd"><div class="ai-result-title">파싱 결과 — ${items.length}건</div><div style="font-size:11px;color:var(--inkl)">수정 후 등록</div></div>
+      <div style="padding:6px 12px 2px;display:grid;grid-template-columns:20px 1fr 1fr 1fr 56px 28px;gap:5px;font-size:10px;color:var(--inkl);font-family:'DM Mono',monospace">
+        <div></div><div>고객</div><div>품종</div><div>단위</div><div>수량</div><div></div>
+      </div>${rows}
+    </div>
+    <button class="confirm-btn" onclick="confirmImport(${items.length})">선택 항목 등록</button>`;
+}
+function confirmImport(count){
+  const fallback=document.getElementById('inv-delivery').value||fmtISO(today());
+  let added=0;
+  for(let i=0;i<count;i++){
+    const chk=document.getElementById(`chk-${i}`);if(!chk?.checked)continue;
+    const customer=document.getElementById(`ac-${i}`)?.value.trim();
+    const variety=document.getElementById(`av-${i}`)?.value;
+    const unit=document.getElementById(`au-${i}`)?.value||'100g';
+    const qty=parseInt(document.getElementById(`aq-${i}`)?.value,10)||1;
+    const delivery=document.getElementById(`ad-${i}`)?.value||fallback;
+    if(!customer)continue;
+    const trays=traysFor(unit,qty,variety);
+    orders.push({id:Date.now()+Math.random(),customer,delivery,variety,trays,note:'',orderUnit:unit,orderQty:qty,plantDate:fmtISO(plantFrom(delivery,variety))});
+    added++;
+  }
+  save();render();
+  document.getElementById('ai-result').innerHTML=`<div style="text-align:center;padding:20px;color:var(--gm);font-size:14px;font-weight:500">✓ ${added}건 등록 완료</div>`;
+  document.getElementById('inv-text').value='';invFileData=null;
+  document.getElementById('inv-drop-text').textContent='PDF 또는 이미지 드래그 & 드롭';
+  document.getElementById('inv-drop-sub').textContent='또는 클릭하여 파일 선택 (PNG, JPG, PDF)';
+  setTimeout(()=>switchTab('orders'),1200);
+}
+
+// ── CALENDAR ──────────────────────────────────────────────────────────────
+function calEvents(){
+  const evs={};
+  const add=(dt,lbl,color,bg)=>{const k=fmtISO(dt);if(!evs[k])evs[k]=[];evs[k].push({lbl,color,bg});};
+  orders.forEach(o=>{
+    const s=calcSched(o.plantDate,o.variety);const v=VARIETIES[o.variety];
+    const sh=o.customer.length>7?o.customer.slice(0,6)+'…':o.customer;
+    if(s.soakStart) add(s.soakStart,`💧${v.name.slice(0,4)}`,'#1a3060','#b5d4f4');
+    add(s.plant,   `🌱${sh}`,'#fff','#4a7c35');
+    add(s.lidOpen, `☀️${sh}`,'#1a4a2e','#b8dfc8');
+    add(s.harvest, `✂️${sh}`,'#fff','#b83030');
+  });
+  return evs;
+}
+function renderCalendar(){
+  const el=document.getElementById('tab-calendar');const evs=calEvents();
+  const first=new Date(calYear,calMonth,1);const last=new Date(calYear,calMonth+1,0);const sdow=first.getDay();
+  const mname=first.toLocaleDateString('ko-KR',{year:'numeric',month:'long'});
+  let cells='';
+  for(let i=0;i<sdow;i++){const d=new Date(calYear,calMonth,-sdow+i+1);cells+=`<div class="cal-day om"><div class="cal-day-num">${d.getDate()}</div></div>`;}
+  for(let d=1;d<=last.getDate();d++){
+    const dt=new Date(calYear,calMonth,d);const k=fmtISO(dt);const dayEvs=evs[k]||[];
+    const evHtml=dayEvs.slice(0,3).map(e=>`<div class="cal-ev" style="background:${e.bg};color:${e.color}">${e.lbl}</div>`).join('')+(dayEvs.length>3?`<div style="font-size:9px;color:var(--inkl)">+${dayEvs.length-3}</div>`:'');
+    cells+=`<div class="cal-day${isToday(dt)?' is-today':''}"><div class="cal-day-num">${d}</div>${evHtml}</div>`;
+  }
+  const trail=7-((sdow+last.getDate())%7);if(trail<7)for(let i=1;i<=trail;i++)cells+=`<div class="cal-day om"><div class="cal-day-num">${i}</div></div>`;
+  el.innerHTML=`<div class="cal-hdr"><button class="cal-nav" onclick="calPrev()">‹ 이전</button><div class="cal-month">${mname}</div><button class="cal-nav" onclick="calNext()">다음 ›</button></div>
+    <div class="cal-grid">${'일월화수목금토'.split('').map(d=>`<div class="cal-dow">${d}</div>`).join('')}${cells}</div>
+    <div class="cal-legend">
+      <div class="cal-leg"><div class="cal-leg-dot" style="background:#b5d4f4"></div>소킹 시작</div>
+      <div class="cal-leg"><div class="cal-leg-dot" style="background:#4a7c35"></div>파종</div>
+      <div class="cal-leg"><div class="cal-leg-dot" style="background:#b8dfc8"></div>뚜껑 개방</div>
+      <div class="cal-leg"><div class="cal-leg-dot" style="background:#b83030"></div>수확/납품</div>
+    </div>`;
+}
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
+
+// ── RAW DATA ──────────────────────────────────────────────────────────────
+function renderRaw(){
+  const el=document.getElementById('tab-raw');
+  const fields=[{key:'soak',label:'Soak(일)'},{key:'blackout',label:'Blackout(일)'},{key:'open',label:'Light(일)'},{key:'grow',label:'Grow(일)'},{key:'seedCost',label:'씨앗원가($)',step:'0.01'},{key:'yieldG',label:'수확량(g)'}];
+  const rows=Object.entries(VARIETIES).map(([key,v])=>`<tr>
+    <td style="padding:6px 10px"><span class="vdot" style="background:${v.color}"></span><strong>${v.name}</strong></td>
+    ${fields.map(f=>`<td><input class="ri" type="number" step="${f.step||1}" min="0" value="${v[f.key]}" onchange="rawChange('${key}','${f.key}',this.value)"></td>`).join('')}
+    <td id="tot-${key}" style="font-size:11px;color:var(--inkl);font-family:'DM Mono',monospace;white-space:nowrap">총 ${v.soak+v.blackout+v.open+v.grow}일</td>
+  </tr>`).join('');
+  el.innerHTML=`<div class="info-box">수확량(g)이 트레이 계산 기준입니다. 예: Arugula 100g/트레이 → 200g 주문 시 2트레이 자동 계산.</div>
+    <div class="raw-wrap"><table class="raw-tbl"><thead><tr><th>품종</th>${fields.map(f=>`<th>${f.label}</th>`).join('')}<th>총 재배일</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+      <button class="raw-save" onclick="saveRaw()">저장</button>
+      <button class="raw-reset" onclick="resetRaw()">기본값 초기화</button>
+      <span class="save-notice" id="save-notice">저장됐어요 ✓</span>
+    </div>`;
+}
+function rawChange(vk,field,val){const num=parseFloat(val);if(!isNaN(num)){VARIETIES[vk][field]=num;const v=VARIETIES[vk];const tot=document.getElementById(`tot-${vk}`);if(tot)tot.textContent=`총 ${v.soak+v.blackout+v.open+v.grow}일`;}}
+function saveRaw(){saveVar();render();const n=document.getElementById('save-notice');if(n){n.classList.add('show');setTimeout(()=>n.classList.remove('show'),2000);}}
+function resetRaw(){if(!confirm('기본값으로 초기화할까요?'))return;VARIETIES=JSON.parse(JSON.stringify(DEFAULT_VARIETIES));saveVar();renderRaw();render();}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function switchTab(name){
+  ['today','orders','calendar','add','raw'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===name?'block':'none';document.getElementById('nb-'+t).classList.toggle('active',t===name);});
+  if(name==='calendar')renderCalendar();if(name==='raw')renderRaw();
+}
+function switchAddMode(mode){
+  ['single','bulk','invoice'].forEach(m=>{document.getElementById('add-'+m).style.display=m===mode?'block':'none';document.getElementById('am-'+m).classList.toggle('active',m===mode);});
+}
+function render(){renderSummary();renderToday();renderOrders();}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+document.getElementById('hdate').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+const todayStr=new Date().toISOString().slice(0,10);
+['f-delivery','b-delivery','inv-delivery'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=todayStr;});
+document.getElementById('f-variety').innerHTML=varOpts('arugula');
+document.getElementById('edit-variety').innerHTML=varOpts('arugula');
+initBulkRows();render();
+</script>
+</body>
+</html>
